@@ -1,0 +1,105 @@
+<h2>Plattform-Auswahl: B vs. C</h2>
+<p class="subtitle">Welche Basis passt am besten für die Grubenberechnungssoftware?</p>
+
+<div class="split">
+  <div class="mockup" style="cursor:pointer;border:2px solid transparent;transition:border 0.2s" onclick="selectPlatform('B', this)">
+    <div class="mockup-header" style="background:#1a3a5c;color:#60a5fa">Option B — Lokale Web-App</div>
+    <div class="mockup-body" style="padding:16px">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:12px">HTML + JavaScript + SQLite (via bessqlite3)</div>
+
+      <div style="margin-bottom:14px">
+        <div class="label" style="color:#22c55e;margin-bottom:6px">✅ Vorteile</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#e2e8f0">
+          <li>Sofort startbar — <code style="background:#1e293b;padding:2px 6px;border-radius:4px">start.command</code> Doppelklick</li>
+          <li>Kein Build-Prozess, kein Installer</li>
+          <li>Einfache Aktualisierungen</li>
+          <li>Kleine Dateigröße (~100 KB App)</li>
+          <li>Schnelle Entwicklung</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div class="label" style="color:#f87171;margin-bottom:6px">⚠️ Nachteile</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#94a3b8">
+          <li>Läuft im Browser (kein eigenes Fenster)</li>
+          <li>Kein App-Icon im Dock</li>
+          <li>Node.js muss installiert sein</li>
+        </ul>
+      </div>
+
+      <div style="background:#0f2a1a;border-radius:8px;padding:10px;font-size:12px;color:#4ade80;margin-top:8px">
+        💡 Perfekt wenn: schnelle Lösung, einfache Wartung, kein IT-Aufwand
+      </div>
+
+      <div style="margin-top:14px;text-align:center;font-size:22px">⚡ Schnell &amp; Leicht</div>
+    </div>
+  </div>
+
+  <div class="mockup" style="cursor:pointer;border:2px solid transparent;transition:border 0.2s" onclick="selectPlatform('C', this)">
+    <div class="mockup-header" style="background:#2d1a5c;color:#a78bfa">Option C — Tauri Desktop-App</div>
+    <div class="mockup-body" style="padding:16px">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:12px">Tauri (Rust) + Vue/React + SQLite (eingebaut)</div>
+
+      <div style="margin-bottom:14px">
+        <div class="label" style="color:#22c55e;margin-bottom:6px">✅ Vorteile</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#e2e8f0">
+          <li>Echtes App-Fenster, eigenes Icon</li>
+          <li>Keine Abhängigkeiten beim Endnutzer</li>
+          <li>Sehr klein (~5–10 MB .app-Datei)</li>
+          <li>Professionellstes Ergebnis</li>
+          <li>Systembenachrichtigungen, Tray-Icon</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div class="label" style="color:#f87171;margin-bottom:6px">⚠️ Nachteile</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#94a3b8">
+          <li>Rust muss installiert sein (für Build)</li>
+          <li>Erster Build dauert ~5 Minuten</li>
+          <li>Etwas komplexere Entwicklung</li>
+        </ul>
+      </div>
+
+      <div style="background:#1a0f2a;border-radius:8px;padding:10px;font-size:12px;color:#a78bfa;margin-top:8px">
+        💡 Perfekt wenn: professionelles Werkzeug, sieht aus wie eine echte App
+      </div>
+
+      <div style="margin-top:14px;text-align:center;font-size:22px">🏆 Professionell &amp; Standalone</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;background:#1e2a1a;border:1px solid #22c55e44;border-radius:10px;padding:16px">
+  <div class="label" style="color:#22c55e;margin-bottom:8px">🎯 Meine Empfehlung</div>
+  <p style="margin:0;font-size:14px;color:#e2e8f0;line-height:1.7">
+    Für ein <strong>professionelles Betriebswerkzeug</strong> im Bau-Bereich empfehle ich <strong style="color:#a78bfa">Option C (Tauri)</strong>.
+    Es sieht aus wie eine echte Desktop-App, hat ein eigenes Fenster und Icon,
+    und die finale <code style="background:#1e293b;padding:2px 5px;border-radius:4px">.app</code>-Datei
+    kann einfach per Doppelklick gestartet werden — ohne Browser, ohne Abhängigkeiten.
+    Der einmalige Build-Aufwand lohnt sich für den professionellen Eindruck.
+  </p>
+</div>
+
+<div class="options" style="margin-top:20px">
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Lokale Web-App</h3>
+      <p>Schnell, leicht, startet im Browser</p>
+    </div>
+  </div>
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tauri Desktop-App ★ Empfohlen</h3>
+      <p>Echte .app-Datei, professionell, standalone</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectPlatform(choice, el) {
+  document.querySelectorAll('.mockup').forEach(m => m.style.border = '2px solid transparent');
+  el.style.border = '2px solid ' + (choice === 'B' ? '#60a5fa' : '#a78bfa');
+}
+</script>

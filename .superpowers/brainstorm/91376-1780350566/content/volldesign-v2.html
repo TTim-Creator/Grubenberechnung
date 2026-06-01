@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grubenberechnung v2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #060b14; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; padding: 20px; }
+  h1 { font-size: 18px; color: #93c5fd; margin-bottom: 4px; }
+  .subtitle { color: #64748b; margin-bottom: 20px; font-size: 13px; }
+  .app-shell { border-radius: 12px; overflow: hidden; border: 1px solid #1e2a40; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-width: 900px; margin: 0 auto 32px; }
+  .titlebar { background: #0a0f1e; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #0d1830; }
+  .titlebar-dots { display: flex; gap: 5px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+  .titlebar-title { flex: 1; text-align: center; color: #475569; font-size: 12px; font-weight: 500; }
+  .app-body { display: flex; height: 580px; }
+  .sidebar { width: 220px; background: #080d1a; border-right: 1px solid #0d1830; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 14px 12px 10px; border-bottom: 1px solid #0d1830; }
+  .sidebar-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: #334155; margin-bottom: 10px; }
+  .btn-new { background: #1e3a5f; color: #3b82f6; border: 1px solid #2d4f7c; border-radius: 6px; padding: 7px 10px; font-size: 11px; cursor: pointer; width: 100%; text-align: left; display: flex; align-items: center; gap: 6px; }
+  .auftrag-list { flex: 1; overflow-y: auto; padding: 6px; }
+  .auftrag-item { padding: 8px 10px; border-radius: 6px; margin-bottom: 2px; cursor: pointer; }
+  .auftrag-item.active { background: #0f2240; border-left: 3px solid #3b82f6; padding-left: 7px; }
+  .auftrag-name { font-size: 12px; color: #cbd5e1; font-weight: 500; }
+  .auftrag-item.active .auftrag-name { color: #93c5fd; }
+  .auftrag-meta { font-size: 10px; color: #334155; margin-top: 2px; }
+  .sidebar-footer { padding: 10px; border-top: 1px solid #0d1830; }
+  .settings-btn { display: flex; align-items: center; gap: 6px; padding: 7px 10px; color: #475569; font-size: 11px; border-radius: 6px; cursor: pointer; }
+  .settings-btn:hover { background: #0d1830; color: #94a3b8; }
+  .detail { flex: 1; display: flex; flex-direction: column; background: #0a0f1e; }
+  .detail-header { padding: 16px 20px 12px; border-bottom: 1px solid #0d1830; display: flex; justify-content: space-between; align-items: flex-start; }
+  .detail-title { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+  .detail-meta { font-size: 11px; color: #334155; margin-top: 3px; }
+  .badge { background: #0f2240; color: #3b82f6; font-size: 10px; padding: 3px 8px; border-radius: 12px; border: 1px solid #1e3a5f; cursor: pointer; }
+  .berechnungen { flex: 1; overflow-y: auto; padding: 12px 20px; }
+  .section-label { font-size: 11px; color: #60a5fa; font-weight: 600; background: #0a0f1e; padding: 10px 20px 4px; display: flex; align-items: center; justify-content: space-between; }
+  .std-info { font-size: 9px; color: #334155; }
+  .berechnung-row { background: #080d1a; border: 1px solid #0d1830; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .berechnung-num { width: 22px; height: 22px; background: #0f2240; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #3b82f6; font-weight: 600; flex-shrink: 0; }
+  .berechnung-dims { flex: 1; }
+  .dims-main { font-size: 13px; color: #cbd5e1; font-weight: 500; }
+  .dims-sub { font-size: 10px; color: #334155; margin-top: 1px; }
+  .faktoren { display: flex; gap: 6px; }
+  .faktor-chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .faktor-b { background: #0f2240; color: #3b82f6; border: 1px solid #1e3a5f; }
+  .faktor-t { background: #0f2240; color: #60a5fa; border: 1px solid #1e3a5f; }
+  .faktor-0 { background: #0d1f0d; color: #22c55e; border: 1px solid #14532d; }
+  .berechnung-del { color: #1e2a40; font-size: 13px; cursor: pointer; padding: 4px; }
+  .berechnung-del:hover { color: #ef4444; }
+  .input-form { padding: 12px 20px; border-top: 1px solid #0d1830; background: #080d1a; }
+  .input-form-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #334155; margin-bottom: 8px; }
+  .form-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; }
+  .form-input-wrap { position: relative; }
+  .form-input { background: #0a0f1e; border: 1px solid #1e2a40; border-radius: 6px; padding: 8px 28px 8px 10px; color: #e2e8f0; font-size: 13px; width: 88px; outline: none; }
+  .form-input:focus { border-color: #3b82f6; }
+  .input-unit { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #334155; font-size: 10px; pointer-events: none; }
+  .preview-box { background: #0f2240; border: 1px solid #1e3a5f; border-radius: 6px; padding: 8px 12px; }
+  .preview-label { font-size: 9px; color: #334155; margin-bottom: 4px; text-transform: uppercase; }
+  .preview-values { display: flex; gap: 10px; }
+  .preview-val { font-size: 15px; font-weight: 700; }
+  .preview-val-b { color: #3b82f6; }
+  .preview-val-t { color: #60a5fa; }
+  .preview-desc { font-size: 9px; color: #475569; }
+  .btn-add { background: #1e3a5f; color: #3b82f6; border: 1px solid #2d4f7c; border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+  /* Settings */
+  .settings-panel { display: none; flex-direction: column; flex: 1; background: #0a0f1e; }
+  .settings-panel.show { display: flex; }
+  .settings-group { background: #080d1a; border: 1px solid #0d1830; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .settings-group-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #3b82f6; margin-bottom: 14px; }
+  .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .setting-row:last-child { margin-bottom: 0; }
+  .setting-name { font-size: 13px; color: #cbd5e1; }
+  .setting-desc { font-size: 10px; color: #334155; margin-top: 2px; }
+  .setting-input-wrap { display: flex; align-items: center; gap: 6px; }
+  .setting-input { background: #0a0f1e; border: 1px solid #1e2a40; border-radius: 5px; padding: 6px 8px; color: #e2e8f0; font-size: 13px; width: 70px; text-align: right; outline: none; }
+  .setting-input:focus { border-color: #3b82f6; }
+  .setting-unit { color: #475569; font-size: 11px; }
+  .btn-save { background: #1e3a5f; color: #3b82f6; border: 1px solid #2d4f7c; border-radius: 6px; padding: 8px 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+  .formula-box { background: #0a0f1e; border: 1px solid #0d1830; border-radius: 6px; padding: 10px 12px; margin-top: 10px; }
+  .formula-title { font-size: 9px; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .formula-line { font-size: 11px; color: #60a5fa; line-height: 2; font-family: monospace; }
+  .formula-var { color: #93c5fd; }
+
+  .tab-bar { display: flex; gap: 8px; padding: 10px 20px; justify-content: center; }
+  .tab { padding: 6px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; border: 1px solid #1e2a40; color: #475569; }
+  .tab.active { background: #1e3a5f; color: #3b82f6; border-color: #2d4f7c; }
+</style>
+</head>
+<body>
+
+<h1>⛏ Grubenberechnung — Design v2</h1>
+<p class="subtitle">Separate Faktor-Einheiten für Breite und Tiefe • Interaktiv</p>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showView('main')">Hauptansicht</div>
+  <div class="tab" onclick="showView('settings')">Einstellungen</div>
+</div>
+
+<div class="app-shell">
+  <div class="titlebar">
+    <div class="titlebar-dots">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+    </div>
+    <div class="titlebar-title">⛏ Grubenberechnung</div>
+    <div style="width:52px"></div>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-label">Aufträge</div>
+        <button class="btn-new"><span style="font-size:14px;font-weight:300">+</span> Neuer Auftrag</button>
+      </div>
+      <div class="auftrag-list">
+        <div class="auftrag-item active">
+          <div class="auftrag-name">Baustelle Nord</div>
+          <div class="auftrag-meta">02.06.2026 · 3 Berechnungen</div>
+        </div>
+        <div class="auftrag-item">
+          <div class="auftrag-name">Projekt Huber</div>
+          <div class="auftrag-meta">01.06.2026 · 1 Berechnung</div>
+        </div>
+        <div class="auftrag-item">
+          <div class="auftrag-name">Müller Str. 5</div>
+          <div class="auftrag-meta">28.05.2026 · 5 Berechnungen</div>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="settings-btn" onclick="showView('settings')">⚙ Einstellungen</div>
+      </div>
+    </div>
+
+    <!-- MAIN VIEW -->
+    <div class="detail" id="view-main">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title">Baustelle Nord</div>
+          <div class="detail-meta">02.06.2026 · Nordring 14, 80000 München</div>
+        </div>
+        <span class="badge">3 Berechnungen</span>
+      </div>
+
+      <div class="section-label">
+        Berechnungen
+        <span class="std-info">Standard: B=15cm T=45cm | B-Faktor: 15cm/Stufe | T-Faktor: 15cm/Stufe</span>
+      </div>
+
+      <div class="berechnungen">
+        <div class="berechnung-row">
+          <div class="berechnung-num">1</div>
+          <div class="berechnung-dims">
+            <div class="dims-main">30 cm × 60 cm</div>
+            <div class="dims-sub">Breite × Tiefe</div>
+          </div>
+          <div class="faktoren">
+            <div class="faktor-chip faktor-b">B: 1</div>
+            <div class="faktor-chip faktor-t">T: 2</div>
+          </div>
+          <div class="berechnung-del">✕</div>
+        </div>
+        <div class="berechnung-row">
+          <div class="berechnung-num">2</div>
+          <div class="berechnung-dims">
+            <div class="dims-main">45 cm × 75 cm</div>
+            <div class="dims-sub">Breite × Tiefe</div>
+          </div>
+          <div class="faktoren">
+            <div class="faktor-chip faktor-b">B: 2</div>
+            <div class="faktor-chip faktor-t">T: 3</div>
+          </div>
+          <div class="berechnung-del">✕</div>
+        </div>
+        <div class="berechnung-row">
+          <div class="berechnung-num">3</div>
+          <div class="berechnung-dims">
+            <div class="dims-main">15 cm × 45 cm</div>
+            <div class="dims-sub">Standardmaß</div>
+          </div>
+          <div class="faktoren">
+            <div class="faktor-chip faktor-0">B: 0</div>
+            <div class="faktor-chip faktor-0">T: 0</div>
+          </div>
+          <div class="berechnung-del">✕</div>
+        </div>
+      </div>
+
+      <!-- Input Form -->
+      <div class="input-form">
+        <div class="input-form-title">Neue Berechnung hinzufügen</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Breite</div>
+            <div class="form-input-wrap">
+              <input class="form-input" id="inp-w" type="number" value="30" min="1" oninput="calcPreview()">
+              <span class="input-unit">cm</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Tiefe</div>
+            <div class="form-input-wrap">
+              <input class="form-input" id="inp-d" type="number" value="60" min="1" oninput="calcPreview()">
+              <span class="input-unit">cm</span>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">Live-Vorschau</div>
+            <div class="preview-values">
+              <div>
+                <div class="preview-val preview-val-b" id="prev-b">B: 1</div>
+                <div class="preview-desc">Breiten-F.</div>
+              </div>
+              <div style="color:#1e3a5f;align-self:center">|</div>
+              <div>
+                <div class="preview-val preview-val-t" id="prev-t">T: 2</div>
+                <div class="preview-desc">Tiefen-F.</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-add">＋ Hinzufügen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="settings-panel" id="view-settings">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title">⚙ Einstellungen</div>
+          <div class="detail-meta">Standard-Werte und Faktor-Einheiten</div>
+        </div>
+        <span class="badge" onclick="showView('main')">← Zurück</span>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+
+        <!-- Standardgrube -->
+        <div class="settings-group">
+          <div class="settings-group-title">📐 Standardgrube</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">Standard-Breite</div>
+              <div class="setting-desc">Breite der Standardgrube (Basis für B-Faktor)</div>
+            </div>
+            <div class="setting-input-wrap">
+              <input class="setting-input" id="s-sw" type="number" value="15" oninput="updateFormula()">
+              <span class="setting-unit">cm</span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">Standard-Tiefe</div>
+              <div class="setting-desc">Tiefe der Standardgrube (Basis für T-Faktor)</div>
+            </div>
+            <div class="setting-input-wrap">
+              <input class="setting-input" id="s-sd" type="number" value="45" oninput="updateFormula()">
+              <span class="setting-unit">cm</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separate Faktor-Einheiten -->
+        <div class="settings-group">
+          <div class="settings-group-title">🔢 Faktor-Einheiten (getrennt)</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">Breiten-Faktor-Einheit</div>
+              <div class="setting-desc">Jede angefangene Einheit = +1 Breiten-Faktor</div>
+            </div>
+            <div class="setting-input-wrap">
+              <input class="setting-input" id="s-bunit" type="number" value="15" oninput="updateFormula()">
+              <span class="setting-unit">cm</span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">Tiefen-Faktor-Einheit</div>
+              <div class="setting-desc">Jede angefangene Einheit = +1 Tiefen-Faktor</div>
+            </div>
+            <div class="setting-input-wrap">
+              <input class="setting-input" id="s-tunit" type="number" value="15" oninput="updateFormula()">
+              <span class="setting-unit">cm</span>
+            </div>
+          </div>
+
+          <div class="formula-box">
+            <div class="formula-title">Berechnungsformel (aktuell)</div>
+            <div class="formula-line" id="formula-b">B-Faktor = ⌈ (Breite − <span class="formula-var">15</span>) / <span class="formula-var">15</span> ⌉</div>
+            <div class="formula-line" id="formula-t">T-Faktor = ⌈ (Tiefe − <span class="formula-var">45</span>) / <span class="formula-var">15</span> ⌉ + B-Faktor</div>
+          </div>
+        </div>
+
+        <button class="btn-save" onclick="showView('main')">✓ Speichern & Zurück</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const CFG = { sw: 15, sd: 45, bunit: 15, tunit: 15 };
+
+  function showView(v) {
+    document.getElementById('view-main').style.display = v === 'main' ? 'flex' : 'none';
+    document.getElementById('view-settings').style.display = v === 'settings' ? 'flex' : 'none';
+    document.querySelectorAll('.tab').forEach((t,i) =>
+      t.classList.toggle('active', (i===0&&v==='main')||(i===1&&v==='settings')));
+  }
+
+  function calcPreview() {
+    const sw = parseInt(document.getElementById('s-sw').value)||15;
+    const sd = parseInt(document.getElementById('s-sd').value)||45;
+    const bu = parseInt(document.getElementById('s-bunit').value)||15;
+    const tu = parseInt(document.getElementById('s-tunit').value)||15;
+    const w = parseInt(document.getElementById('inp-w').value)||0;
+    const d = parseInt(document.getElementById('inp-d').value)||0;
+    const bF = w > sw ? Math.ceil((w - sw) / bu) : 0;
+    const tF = d > sd ? Math.ceil((d - sd) / tu) + bF : bF;
+    document.getElementById('prev-b').textContent = 'B: ' + bF;
+    document.getElementById('prev-t').textContent = 'T: ' + tF;
+  }
+
+  function updateFormula() {
+    const sw = document.getElementById('s-sw').value||15;
+    const sd = document.getElementById('s-sd').value||45;
+    const bu = document.getElementById('s-bunit').value||15;
+    const tu = document.getElementById('s-tunit').value||15;
+    document.getElementById('formula-b').innerHTML =
+      `B-Faktor = ⌈ (Breite − <span class="formula-var">${sw}</span>) / <span class="formula-var">${bu}</span> ⌉`;
+    document.getElementById('formula-t').innerHTML =
+      `T-Faktor = ⌈ (Tiefe − <span class="formula-var">${sd}</span>) / <span class="formula-var">${tu}</span> ⌉ + B-Faktor`;
+    calcPreview();
+  }
+
+  showView('main');
+  calcPreview();
+</script>
+</body>
+</html>
