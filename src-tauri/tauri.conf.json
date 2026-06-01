@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Grubenberechnung",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.grubenberechnung.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,11 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "Grubenberechnung",
-        "width": 1280,
-        "height": 800,
-        "minWidth": 960,
-        "minHeight": 600,
+        "title": "⛏ Grubenberechnung",
+        "width": 900,
+        "height": 620,
+        "minWidth": 700,
+        "minHeight": 500,
         "resizable": true,
         "fullscreen": false,
         "decorations": true
