@@ -4,8 +4,13 @@ import { AKZENT_PRESETS } from '@/types'
 import { ArrowLeft, Save, Lock, Eye, EyeOff } from 'lucide-react'
 import { applyAkzentFarbe } from '@/lib/theme'
 
-// Passwort für Erweiterte Einstellungen (UI-Schutz)
-const ERWEITERTES_PW = 'TTRRR2026!'
+// SHA-256 Hash von TTRR2026! — Klartext nie im Code gespeichert
+const ERWEITERTES_PW_HASH = '0815ad7cabe9b0babe499c26005b4df1787457e3e259b5b462f3bcffb11440dc'
+
+async function hashPasswort(pw: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 interface Props {
   einstellungen: Einstellungen
@@ -53,8 +58,9 @@ export function EinstellungenView({ einstellungen, onSave, onBack }: Props) {
     applyAkzentFarbe(farbe) // Live-Vorschau
   }
 
-  const handlePwPruefen = () => {
-    if (pwEingabe === ERWEITERTES_PW) {
+  const handlePwPruefen = async () => {
+    const hash = await hashPasswort(pwEingabe)
+    if (hash === ERWEITERTES_PW_HASH) {
       setErweitertFreigegeben(true)
       setPwFehler(false)
       setPwEingabe('')
