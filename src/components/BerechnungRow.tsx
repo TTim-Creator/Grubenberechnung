@@ -30,6 +30,12 @@ export function BerechnungRow({ berechnung, index, onDelete, onRename }: Props) 
         <div className="text-sm font-medium text-foreground">
           {berechnung.breite} cm × {berechnung.tiefe} cm
         </div>
+        <div className="text-[9px] text-[#334155]">
+          {new Date(berechnung.erstellt_am.length === 10
+            ? parseInt(berechnung.erstellt_am) * 1000
+            : berechnung.erstellt_am
+          ).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+        </div>
         {editMode ? (
           <div className="flex items-center gap-1.5 mt-1">
             <input
