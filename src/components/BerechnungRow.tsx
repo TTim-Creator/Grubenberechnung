@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Berechnung } from '@/types'
 import { X, Pencil, Check } from 'lucide-react'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface Props {
   berechnung: Berechnung
@@ -14,6 +15,7 @@ export function BerechnungRow({ berechnung, index, onDelete, onRename }: Props) 
   const t0 = berechnung.t_faktor === 0
   const [editMode, setEditMode] = useState(false)
   const [editValue, setEditValue] = useState(berechnung.bezeichnung)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const handleSave = () => {
     onRename(berechnung.id, editValue)
@@ -86,11 +88,19 @@ export function BerechnungRow({ berechnung, index, onDelete, onRename }: Props) 
       </div>
 
       <button
-        onClick={() => onDelete(berechnung.id)}
+        onClick={() => setConfirmOpen(true)}
         className="text-[#1e2a40] hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 p-1 flex-shrink-0"
       >
         <X size={14} />
       </button>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        titel="Berechnung löschen?"
+        beschreibung={`${berechnung.breite} × ${berechnung.tiefe} cm${berechnung.bezeichnung ? ` — "${berechnung.bezeichnung}"` : ''} wird unwiderruflich gelöscht.`}
+        onConfirm={() => { setConfirmOpen(false); onDelete(berechnung.id) }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

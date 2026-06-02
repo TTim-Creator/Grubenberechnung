@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { Auftrag } from '@/types'
 import { Plus, Settings, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface Props {
   auftraege: Auftrag[]
@@ -12,6 +14,9 @@ interface Props {
 }
 
 export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDelete, onSettings }: Props) {
+  const [confirmId, setConfirmId] = useState<number | null>(null)
+  const confirmAuftrag = auftraege.find(a => a.id === confirmId)
+
   return (
     <div className="w-[220px] flex-shrink-0 bg-[#080d1a] border-r border-[#0d1830] flex flex-col">
       {/* App-Titel + Firmenname */}
@@ -24,6 +29,7 @@ export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDe
           <div className="text-[10px] text-accent mt-0.5 truncate">{firmenName}</div>
         )}
       </div>
+
       <div className="p-3 border-b border-[#0d1830]">
         <div className="text-[9px] uppercase tracking-widest text-[#334155] mb-2.5">Aufträge</div>
         <button
@@ -59,7 +65,7 @@ export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDe
               </div>
             </div>
             <button
-              onClick={e => { e.stopPropagation(); onDelete(a.id) }}
+              onClick={e => { e.stopPropagation(); setConfirmId(a.id) }}
               className="opacity-0 group-hover:opacity-100 text-[#334155] hover:text-destructive p-1 transition-all"
             >
               <Trash2 size={11} />
@@ -76,6 +82,14 @@ export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDe
           <Settings size={13} /> Einstellungen
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        titel="Auftrag löschen?"
+        beschreibung={`"${confirmAuftrag?.name ?? ''}" und alle enthaltenen Berechnungen werden unwiderruflich gelöscht.`}
+        onConfirm={() => { if (confirmId !== null) onDelete(confirmId); setConfirmId(null) }}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   )
 }
