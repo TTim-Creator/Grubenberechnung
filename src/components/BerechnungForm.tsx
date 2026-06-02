@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Einstellungen } from '@/types'
 import { berechne } from '@/lib/calc'
 import { Check } from 'lucide-react'
@@ -12,6 +12,7 @@ export function BerechnungForm({ einstellungen, onAdd }: Props) {
   const [breite, setBreite] = useState('')
   const [tiefe, setTiefe] = useState('')
   const [bezeichnung, setBezeichnung] = useState('')
+  const breiteRef = useRef<HTMLInputElement>(null)
 
   const bVal = parseInt(breite) || 0
   const tVal = parseInt(tiefe) || 0
@@ -27,6 +28,7 @@ export function BerechnungForm({ einstellungen, onAdd }: Props) {
     setBreite('')
     setTiefe('')
     setBezeichnung('')
+    setTimeout(() => breiteRef.current?.focus(), 50)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -57,6 +59,7 @@ export function BerechnungForm({ einstellungen, onAdd }: Props) {
             <input
               type="number"
               min="1"
+              ref={breiteRef}
               value={breite}
               onChange={e => setBreite(e.target.value)}
               onKeyDown={handleKeyDown}
