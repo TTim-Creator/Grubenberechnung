@@ -1,3 +1,8 @@
+pub const MIGRATION_V2: &str = r#"
+ALTER TABLE einstellungen ADD COLUMN akzent_farbe TEXT NOT NULL DEFAULT '#3b82f6';
+ALTER TABLE einstellungen ADD COLUMN firmen_name TEXT NOT NULL DEFAULT '';
+"#;
+
 pub const MIGRATION_V1: &str = r#"
 CREATE TABLE IF NOT EXISTS einstellungen (
   id         INTEGER PRIMARY KEY DEFAULT 1,

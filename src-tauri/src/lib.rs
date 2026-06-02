@@ -12,12 +12,20 @@ pub fn run() {
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
                     "sqlite:grubenberechnung.db",
-                    vec![Migration {
-                        version: 1,
-                        description: "initial schema",
-                        sql: db::MIGRATION_V1,
-                        kind: MigrationKind::Up,
-                    }],
+                    vec![
+                        Migration {
+                            version: 1,
+                            description: "initial schema",
+                            sql: db::MIGRATION_V1,
+                            kind: MigrationKind::Up,
+                        },
+                        Migration {
+                            version: 2,
+                            description: "add akzent_farbe and firmen_name",
+                            sql: db::MIGRATION_V2,
+                            kind: MigrationKind::Up,
+                        },
+                    ],
                 )
                 .build(),
         )

@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Einstellungen } from '@/types'
 import { loadEinstellungen, saveEinstellungen } from '@/lib/db'
 
-const DEFAULT: Einstellungen = { id: 1, std_breite: 15, std_tiefe: 45, b_einheit: 15, t_einheit: 15 }
+const DEFAULT: Einstellungen = {
+  id: 1, std_breite: 15, std_tiefe: 45, b_einheit: 15, t_einheit: 15,
+  akzent_farbe: '#3b82f6', firmen_name: '',
+}
 
 export function useEinstellungen() {
   const [einstellungen, setEinstellungen] = useState<Einstellungen>(DEFAULT)

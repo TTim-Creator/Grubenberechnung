@@ -22,9 +22,11 @@ export async function saveEinstellungen(
   const conn = await getDb()
   await conn.execute(
     `UPDATE einstellungen
-     SET std_breite=$1, std_tiefe=$2, b_einheit=$3, t_einheit=$4
+     SET std_breite=$1, std_tiefe=$2, b_einheit=$3, t_einheit=$4,
+         akzent_farbe=$5, firmen_name=$6
      WHERE id=1`,
-    [data.std_breite, data.std_tiefe, data.b_einheit, data.t_einheit],
+    [data.std_breite, data.std_tiefe, data.b_einheit, data.t_einheit,
+     data.akzent_farbe, data.firmen_name],
   )
 }
 
