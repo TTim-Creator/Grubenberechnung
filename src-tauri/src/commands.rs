@@ -74,10 +74,13 @@ pub async fn validate_license_online(
     }
 
     let valid = json["meta"]["valid"].as_bool().unwrap_or(false);
+    let code = json["meta"]["code"].as_str().unwrap_or("INVALID");
     let lizenz_id = json["data"]["id"].as_str().map(|s| s.to_string());
 
-    if !valid {
-        let code = json["meta"]["code"].as_str().unwrap_or("INVALID");
+    // NO_MACHINE = Schlüssel korrekt, aber noch keine Maschine registriert → aktivieren
+    let needs_activation = !valid && code == "NO_MACHINE";
+
+    if !valid && !needs_activation {
         return Ok(LizenzValidierungErgebnis {
             gueltig: false,
             lizenz_id: None,
@@ -85,7 +88,7 @@ pub async fn validate_license_online(
         });
     }
 
-    // Maschine aktivieren
+    // Maschine aktivieren (beim ersten Mal oder wenn NO_MACHINE)
     let activate_url = format!(
         "https://api.keygen.sh/v1/accounts/{}/machines",
         KEYGEN_ACCOUNT
@@ -101,7 +104,7 @@ pub async fn validate_license_online(
         }
     });
 
-    let _ = client
+    let activate_resp = client
         .post(&activate_url)
         .header("Content-Type", "application/vnd.api+json")
         .header("Accept", "application/vnd.api+json")
@@ -109,6 +112,32 @@ pub async fn validate_license_online(
         .json(&activate_body)
         .send()
         .await;
+
+    if needs_activation {
+        // Nach Maschinenaktivierung: prüfen ob erfolgreich
+        match activate_resp {
+            Ok(r) if r.status().is_success() => {}
+            Ok(r) => {
+                let err_json: serde_json::Value = r.json().await.unwrap_or_default();
+                let msg = err_json["errors"][0]["detail"]
+                    .as_str()
+                    .unwrap_or("Aktivierung fehlgeschlagen")
+                    .to_string();
+                return Ok(LizenzValidierungErgebnis {
+                    gueltig: false,
+                    lizenz_id: None,
+                    fehler: Some(msg),
+                });
+            }
+            Err(e) => {
+                return Ok(LizenzValidierungErgebnis {
+                    gueltig: false,
+                    lizenz_id: None,
+                    fehler: Some(format!("Netzwerkfehler: {}", e)),
+                });
+            }
+        }
+    }
 
     Ok(LizenzValidierungErgebnis {
         gueltig: true,
