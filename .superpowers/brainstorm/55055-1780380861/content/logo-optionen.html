@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Grubenberechnung — Logo-Optionen</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #060b14;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+  h1 { font-size: 18px; color: #93c5fd; margin-bottom: 6px; }
+  .sub { color: #475569; font-size: 13px; margin-bottom: 32px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .logo-card {
+    background: #080d1a;
+    border: 2px solid #0d1830;
+    border-radius: 16px;
+    padding: 32px 24px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo-card:hover { border-color: #1e3a5f; transform: translateY(-2px); }
+  .logo-card.selected { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6, 0 8px 30px rgba(59,130,246,0.15); }
+
+  .logo-preview {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-info { text-align: center; }
+  .logo-name { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .logo-desc { font-size: 12px; color: #475569; line-height: 1.5; }
+  .logo-tag { display: inline-block; background: #0f2240; color: #60a5fa; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 8px; border: 1px solid #1e3a5f; }
+
+  .variants {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+  .variant { font-size: 10px; color: #334155; }
+
+  .chosen-hint {
+    text-align: center;
+    color: #334155;
+    font-size: 12px;
+    margin-top: 24px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+<body>
+
+<h1 style="text-align:center">⛏ Grubenberechnung — Logo-Optionen</h1>
+<p class="sub" style="text-align:center">Klicke auf deine bevorzugte Option</p>
+
+<div class="grid">
+
+  <!-- ── Option A: Geometrisch ── -->
+  <div class="logo-card" id="card-a" onclick="select('a')">
+    <div class="logo-preview">
+      <svg viewBox="0 0 140 140" width="140" height="140">
+        <defs>
+          <linearGradient id="gA1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0d1a2e"/>
+            <stop offset="100%" stop-color="#070c18"/>
+          </linearGradient>
+          <linearGradient id="gA2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+        </defs>
+        <!-- Hintergrund -->
+        <rect width="140" height="140" rx="28" fill="url(#gA1)"/>
+        <!-- Geometrisches G: zwei ineinander verschachtelte Quadrate -->
+        <rect x="25" y="25" width="90" height="90" rx="8" fill="none" stroke="#1e3a5f" stroke-width="2"/>
+        <rect x="38" y="38" width="64" height="64" rx="5" fill="none" stroke="url(#gA2)" stroke-width="2.5"/>
+        <!-- Initialen G·B -->
+        <text x="70" y="82" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif"
+              font-size="32" font-weight="800" fill="url(#gA2)"
+              text-anchor="middle" letter-spacing="-2">GB</text>
+        <!-- Akzentlinie unten -->
+        <line x1="38" y1="108" x2="102" y2="108" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-info">
+      <div class="logo-name">A — Geometrisch Modern</div>
+      <div class="logo-desc">Klare Formen, Monogramm GB auf dunklem Grund. Minimalistische Eleganz — wirkt wie ein Tech-Unternehmen.</div>
+      <div class="logo-tag">Minimal · Corporate</div>
+    </div>
+  </div>
+
+  <!-- ── Option B: Pickel + Text ── -->
+  <div class="logo-card" id="card-b" onclick="select('b')">
+    <div class="logo-preview">
+      <svg viewBox="0 0 140 140" width="140" height="140">
+        <defs>
+          <linearGradient id="gB1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0a0f1e"/>
+            <stop offset="100%" stop-color="#050810"/>
+          </linearGradient>
+          <linearGradient id="gB2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#93c5fd"/>
+            <stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+        </defs>
+        <rect width="140" height="140" rx="28" fill="url(#gB1)"/>
+        <!-- Glow -->
+        <circle cx="70" cy="55" r="38" fill="#3b82f6" opacity="0.06"/>
+        <!-- Pickelstiel -->
+        <rect x="67" y="62" width="8" height="50" rx="4" fill="#1e3a5f"
+              transform="rotate(40 71 87)"/>
+        <rect x="67" y="62" width="8" height="50" rx="4" fill="#3b82f6" opacity="0.5"
+              transform="rotate(40 71 87)"/>
+        <!-- Pickelkopf -->
+        <rect x="18" y="34" width="96" height="22" rx="6" fill="url(#gB2)"/>
+        <!-- Linke Spitze -->
+        <polygon points="18,34 5,45 18,56" fill="#60a5fa"/>
+        <!-- Glanzlicht auf Kopf -->
+        <rect x="22" y="38" width="50" height="4" rx="2" fill="white" opacity="0.15"/>
+        <!-- Schrift -->
+        <text x="70" y="120" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif"
+              font-size="11" font-weight="700" fill="#3b82f6"
+              text-anchor="middle" letter-spacing="3">GRUBEN</text>
+      </svg>
+    </div>
+    <div class="logo-info">
+      <div class="logo-name">B — Pickel + Schrift</div>
+      <div class="logo-desc">Das klassische Bau-Werkzeug als zentrales Icon. Sofort erkennbar als Tiefbau-Software — stark und direkt.</div>
+      <div class="logo-tag">Branchen-Ikone · Klar</div>
+    </div>
+  </div>
+
+  <!-- ── Option C: Tiefenmessung ── -->
+  <div class="logo-card" id="card-c" onclick="select('c')">
+    <div class="logo-preview">
+      <svg viewBox="0 0 140 140" width="140" height="140">
+        <defs>
+          <linearGradient id="gC1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0d1a2e"/>
+            <stop offset="100%" stop-color="#04080f"/>
+          </linearGradient>
+        </defs>
+        <rect width="140" height="140" rx="28" fill="url(#gC1)"/>
+
+        <!-- Querschnitt einer Grube (Seitenansicht) -->
+        <!-- Erdoberfläche -->
+        <rect x="15" y="45" width="110" height="8" rx="2" fill="#1e2a40"/>
+        <!-- Erde (links) -->
+        <rect x="15" y="45" width="30" height="65" rx="0" fill="#1e2a40" opacity="0.6"/>
+        <!-- Erde (rechts) -->
+        <rect x="95" y="45" width="30" height="65" rx="0" fill="#1e2a40" opacity="0.6"/>
+
+        <!-- Grube Kontur -->
+        <path d="M 45 45 L 45 95 Q 70 108 95 95 L 95 45" fill="#0a0f1e" stroke="#3b82f6" stroke-width="2"/>
+
+        <!-- Maßlinie Tiefe -->
+        <line x1="108" y1="45" x2="108" y2="95" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <line x1="103" y1="45" x2="113" y2="45" stroke="#3b82f6" stroke-width="1.5"/>
+        <line x1="103" y1="95" x2="113" y2="95" stroke="#60a5fa" stroke-width="1.5"/>
+
+        <!-- Maßlinie Breite -->
+        <line x1="45" y1="30" x2="95" y2="30" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <line x1="45" y1="25" x2="45" y2="35" stroke="#3b82f6" stroke-width="1.5"/>
+        <line x1="95" y1="25" x2="95" y2="35" stroke="#60a5fa" stroke-width="1.5"/>
+
+        <!-- T und B Labels -->
+        <text x="119" y="72" font-size="9" font-weight="700" fill="#60a5fa" font-family="monospace">T</text>
+        <text x="67" y="24" font-size="9" font-weight="700" fill="#60a5fa" font-family="monospace" text-anchor="middle">B</text>
+
+        <!-- Faktoren -->
+        <text x="70" y="78" font-size="13" font-weight="800" fill="#3b82f6" font-family="monospace" text-anchor="middle">B:1 T:2</text>
+
+        <!-- Bodenbezeichnung -->
+        <text x="70" y="128" font-size="9" font-weight="600" fill="#334155" font-family="monospace" text-anchor="middle" letter-spacing="2">BERECHNUNG</text>
+      </svg>
+    </div>
+    <div class="logo-info">
+      <div class="logo-name">C — Querschnitt</div>
+      <div class="logo-desc">Technischer Grubquerschnitt mit Maßlinien. Zeigt direkt was die Software macht — Tiefe und Breite messen. Für Experten sofort lesbar.</div>
+      <div class="logo-tag">Technisch · Präzise</div>
+    </div>
+  </div>
+
+  <!-- ── Option D: Premium Bold ── -->
+  <div class="logo-card" id="card-d" onclick="select('d')">
+    <div class="logo-preview">
+      <svg viewBox="0 0 140 140" width="140" height="140">
+        <defs>
+          <linearGradient id="gD1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0d1a2e"/>
+            <stop offset="100%" stop-color="#070c18"/>
+          </linearGradient>
+          <linearGradient id="gD2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#93c5fd"/>
+            <stop offset="60%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#1e40af"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <rect width="140" height="140" rx="28" fill="url(#gD1)"/>
+
+        <!-- Hintergrund-Kreis Glow -->
+        <circle cx="70" cy="62" r="42" fill="#3b82f6" opacity="0.05"/>
+        <circle cx="70" cy="62" r="38" fill="none" stroke="#1e3a5f" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- Großes G — massiv & premium -->
+        <text x="70" y="90" font-family="'SF Pro Display', 'Helvetica Neue', Arial Black, sans-serif"
+              font-size="72" font-weight="900" fill="url(#gD2)"
+              text-anchor="middle" letter-spacing="-4">G</text>
+
+        <!-- Unterstrich-Akzent -->
+        <rect x="30" y="104" width="80" height="3" rx="1.5" fill="#3b82f6" opacity="0.8"/>
+        <rect x="46" y="104" width="48" height="3" rx="1.5" fill="#93c5fd" opacity="0.4"/>
+
+        <!-- Kleiner Schriftzug -->
+        <text x="70" y="125" font-family="'Helvetica Neue', sans-serif"
+              font-size="8.5" font-weight="600" fill="#475569"
+              text-anchor="middle" letter-spacing="4">GRUBENBERECHNUNG</text>
+
+        <!-- Glanzpunkt -->
+        <circle cx="88" cy="38" r="3" fill="#93c5fd" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="logo-info">
+      <div class="logo-name">D — Premium Letter</div>
+      <div class="logo-desc">Großes, kraftvolles G mit Farbverlauf — Premium-Marken-Ästhetik. Wirkt wie eine etablierte Industrie-Software. Zeitlos und selbstbewusst.</div>
+      <div class="logo-tag">Premium · Zeitlos · Bold</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="chosen-hint" id="hint">Klicke auf eine Option — ich übernehme das Design als App-Icon</p>
+
+<script>
+let chosen = null;
+function select(id) {
+  document.querySelectorAll('.logo-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + id).classList.add('selected');
+  chosen = id;
+  const names = { a: 'A — Geometrisch Modern', b: 'B — Pickel + Schrift', c: 'C — Querschnitt', d: 'D — Premium Letter' };
+  document.getElementById('hint').textContent = '✓ Gewählt: ' + names[id] + ' — teile mir deine Wahl im Chat mit';
+  document.getElementById('hint').style.color = '#3b82f6';
+
+  // Trigger selection event for superpowers framework
+  if (window.__superPowersSelect) window.__superPowersSelect(id, names[id]);
+}
+</script>
+</body>
+</html>
