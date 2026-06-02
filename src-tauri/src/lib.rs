@@ -25,6 +25,12 @@ pub fn run() {
                             sql: db::MIGRATION_V2,
                             kind: MigrationKind::Up,
                         },
+                        Migration {
+                            version: 3,
+                            description: "add bezeichnung to berechnungen",
+                            sql: db::MIGRATION_V3,
+                            kind: MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),

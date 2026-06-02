@@ -70,23 +70,29 @@ export async function createBerechnung(
   tiefe: number,
   bFaktor: number,
   tFaktor: number,
+  bezeichnung = '',
 ): Promise<Berechnung> {
   const conn = await getDb()
   const now = new Date().toISOString()
   const result = await conn.execute(
-    `INSERT INTO berechnungen (auftrag_id, breite, tiefe, b_faktor, t_faktor, erstellt_am)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [auftragId, breite, tiefe, bFaktor, tFaktor, now],
+    `INSERT INTO berechnungen (auftrag_id, breite, tiefe, b_faktor, t_faktor, bezeichnung, erstellt_am)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [auftragId, breite, tiefe, bFaktor, tFaktor, bezeichnung.trim(), now],
   )
   return {
     id: result.lastInsertId as number,
     auftrag_id: auftragId,
-    breite,
-    tiefe,
+    breite, tiefe,
     b_faktor: bFaktor,
     t_faktor: tFaktor,
+    bezeichnung: bezeichnung.trim(),
     erstellt_am: now,
   }
+}
+
+export async function updateBezeichnung(id: number, bezeichnung: string): Promise<void> {
+  const conn = await getDb()
+  await conn.execute('UPDATE berechnungen SET bezeichnung=$1 WHERE id=$2', [bezeichnung.trim(), id])
 }
 
 export async function deleteBerechnung(id: number): Promise<void> {

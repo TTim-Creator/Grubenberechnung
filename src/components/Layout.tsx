@@ -14,7 +14,7 @@ export function Layout() {
   const [modalOpen, setModalOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
-  const { berechnungen, addBerechnung, loescheBerechnung } = useBerechnungen(aktiveAuftragId)
+  const { berechnungen, addBerechnung, loescheBerechnung, benenneBerechnung } = useBerechnungen(aktiveAuftragId)
 
   const aktiveAuftrag = auftraege.find(a => a.id === aktiveAuftragId) ?? null
 
@@ -51,6 +51,7 @@ export function Layout() {
           einstellungen={einstellungen}
           onAddBerechnung={addBerechnung}
           onDeleteBerechnung={loescheBerechnung}
+          onRenameBerechnung={benenneBerechnung}
         />
       )}
 

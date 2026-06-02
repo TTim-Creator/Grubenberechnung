@@ -43,6 +43,7 @@ export interface Berechnung {
   tiefe: number        // cm
   b_faktor: number
   t_faktor: number
+  bezeichnung: string  // optionaler Name
   erstellt_am: string
 }
 

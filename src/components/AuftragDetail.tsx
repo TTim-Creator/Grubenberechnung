@@ -7,12 +7,13 @@ interface Props {
   auftrag: Auftrag | null
   berechnungen: Berechnung[]
   einstellungen: Einstellungen
-  onAddBerechnung: (b: number, t: number, bf: number, tf: number) => void
+  onAddBerechnung: (b: number, t: number, bf: number, tf: number, bezeichnung: string) => void
   onDeleteBerechnung: (id: number) => void
+  onRenameBerechnung: (id: number, name: string) => void
 }
 
 export function AuftragDetail({
-  auftrag, berechnungen, einstellungen, onAddBerechnung, onDeleteBerechnung,
+  auftrag, berechnungen, einstellungen, onAddBerechnung, onDeleteBerechnung, onRenameBerechnung,
 }: Props) {
   if (!auftrag) {
     return (
@@ -57,6 +58,7 @@ export function AuftragDetail({
                 berechnung={b}
                 index={i + 1}
                 onDelete={onDeleteBerechnung}
+                onRename={onRenameBerechnung}
               />
             ))}
           </div>
