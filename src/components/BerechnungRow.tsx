@@ -13,7 +13,7 @@ export function BerechnungRow({ berechnung, index, onDelete }: Props) {
 
   return (
     <div className="flex items-center gap-3 bg-[#080d1a] border border-[#0d1830] rounded-lg px-4 py-3 hover:border-[#1e2a40] transition-colors group">
-      <div className="w-6 h-6 rounded-full bg-[#0f2240] flex items-center justify-center text-[10px] font-semibold text-accent flex-shrink-0">
+      <div className="w-6 h-6 rounded-full bg-[var(--app-accent-dark)] flex items-center justify-center text-[10px] font-semibold text-accent flex-shrink-0">
         {index}
       </div>
       <div className="flex-1">
@@ -24,12 +24,12 @@ export function BerechnungRow({ berechnung, index, onDelete }: Props) {
       </div>
       <div className="flex gap-2">
         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-          b0 ? 'bg-[#0d1f0d] text-success border-[#14532d]' : 'bg-[#0f2240] text-accent border-[#1e3a5f]'
+          b0 ? 'bg-[#0d1f0d] text-success border-[#14532d]' : 'bg-[var(--app-accent-dark)] text-accent border-[var(--app-accent-dim)]'
         }`}>
           B: {berechnung.b_faktor}
         </span>
         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-          t0 ? 'bg-[#0d1f0d] text-success border-[#14532d]' : 'bg-[#0f2240] text-accent-light border-[#1e3a5f]'
+          t0 ? 'bg-[#0d1f0d] text-success border-[#14532d]' : 'bg-[var(--app-accent-dark)] text-accent-light border-[var(--app-accent-dim)]'
         }`}>
           T: {berechnung.t_faktor}
         </span>

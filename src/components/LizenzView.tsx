@@ -57,7 +57,7 @@ export function LizenzView({ onAktiviert }: Props) {
           <button
             onClick={handleAktivieren}
             disabled={!key.trim() || loading}
-            className="w-full bg-[#1e3a5f] hover:bg-[#243f6a] disabled:opacity-50 disabled:cursor-not-allowed text-accent border border-[#2d4f7c] rounded-md py-2.5 text-sm font-semibold transition-colors"
+            className="w-full bg-[var(--app-accent-dim)] hover:bg-[var(--app-accent-dim-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-accent border border-[var(--app-accent-dim-border)] rounded-md py-2.5 text-sm font-semibold transition-colors"
           >
             {loading ? 'Wird aktiviert…' : 'Aktivieren'}
           </button>

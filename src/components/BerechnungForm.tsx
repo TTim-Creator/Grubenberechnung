@@ -70,14 +70,14 @@ export function BerechnungForm({ einstellungen, onAdd }: Props) {
         </div>
 
         {canAdd && (
-          <div className="bg-[#0f2240] border border-[#1e3a5f] rounded-md px-3 py-2 min-w-[110px]">
+          <div className="bg-[var(--app-accent-dark)] border border-[var(--app-accent-dim)] rounded-md px-3 py-2 min-w-[110px]">
             <div className="text-[9px] text-[#334155] mb-1 uppercase">Vorschau</div>
             <div className="flex gap-3">
               <div>
                 <span className="text-base font-bold text-accent">B: {b_faktor}</span>
                 <div className="text-[9px] text-[#475569]">Breite</div>
               </div>
-              <div className="text-[#1e3a5f] self-center">|</div>
+              <div className="text-[var(--app-accent-dim)] self-center">|</div>
               <div>
                 <span className="text-base font-bold text-accent-light">T: {t_faktor}</span>
                 <div className="text-[9px] text-[#475569]">Tiefe</div>
@@ -89,7 +89,7 @@ export function BerechnungForm({ einstellungen, onAdd }: Props) {
         <button
           onClick={handleAdd}
           disabled={!canAdd}
-          className="flex items-center gap-1.5 bg-[#1e3a5f] hover:bg-[#243f6a] disabled:opacity-40 disabled:cursor-not-allowed text-accent border border-[#2d4f7c] rounded-md px-4 py-2 text-xs font-semibold transition-colors"
+          className="flex items-center gap-1.5 bg-[var(--app-accent-dim)] hover:bg-[var(--app-accent-dim-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-accent border border-[var(--app-accent-dim-border)] rounded-md px-4 py-2 text-xs font-semibold transition-colors"
         >
           <Plus size={14} />
           Hinzufügen

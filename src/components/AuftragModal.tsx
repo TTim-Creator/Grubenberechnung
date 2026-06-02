@@ -59,7 +59,7 @@ export function AuftragModal({ open, onClose, onConfirm }: Props) {
           <Button
             onClick={handleConfirm}
             disabled={!name.trim()}
-            className="bg-[#1e3a5f] hover:bg-[#243f6a] text-accent border border-[#2d4f7c]"
+            className="bg-[var(--app-accent-dim)] hover:bg-[var(--app-accent-dim-hover)] text-accent border border-[var(--app-accent-dim-border)]"
           >
             Erstellen
           </Button>

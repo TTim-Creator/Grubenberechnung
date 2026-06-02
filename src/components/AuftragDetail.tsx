@@ -32,7 +32,7 @@ export function AuftragDetail({
             {auftrag.adresse && ` · ${auftrag.adresse}`}
           </div>
         </div>
-        <span className="bg-[#0f2240] text-accent text-[10px] px-2.5 py-1 rounded-full border border-[#1e3a5f]">
+        <span className="bg-[var(--app-accent-dark)] text-accent text-[10px] px-2.5 py-1 rounded-full border border-[var(--app-accent-dim)]">
           {berechnungen.length} Berechnung{berechnungen.length !== 1 ? 'en' : ''}
         </span>
       </div>

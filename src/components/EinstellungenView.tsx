@@ -85,7 +85,7 @@ export function EinstellungenView({ einstellungen, onSave, onBack }: Props) {
         </div>
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-[#0f2240] border border-[#1e3a5f] rounded-md px-3 py-1.5 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-[var(--app-accent-dark)] border border-[var(--app-accent-dim)] rounded-md px-3 py-1.5 transition-colors"
         >
           <ArrowLeft size={12} /> Zurück
         </button>
@@ -206,7 +206,7 @@ export function EinstellungenView({ einstellungen, onSave, onBack }: Props) {
                 </div>
                 <button
                   onClick={handlePwPruefen}
-                  className="bg-[#1e2a40] hover:bg-[#1e3a5f] text-muted-foreground border border-[#1e2a40] rounded-md px-3 py-2 text-xs transition-colors"
+                  className="bg-[#1e2a40] hover:bg-[var(--app-accent-dim)] text-muted-foreground border border-[#1e2a40] rounded-md px-3 py-2 text-xs transition-colors"
                 >
                   Entsperren
                 </button>
@@ -247,7 +247,7 @@ export function EinstellungenView({ einstellungen, onSave, onBack }: Props) {
         {/* Speichern */}
         <button
           onClick={handleSpeichern}
-          className="flex items-center gap-2 bg-[#1e3a5f] hover:bg-[#243f6a] text-accent border border-[#2d4f7c] rounded-md px-5 py-2 text-sm font-semibold transition-colors"
+          className="flex items-center gap-2 bg-[var(--app-accent-dim)] hover:bg-[var(--app-accent-dim-hover)] text-accent border border-[var(--app-accent-dim-border)] rounded-md px-5 py-2 text-sm font-semibold transition-colors"
         >
           <Save size={14} /> Speichern
         </button>

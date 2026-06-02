@@ -28,7 +28,7 @@ export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDe
         <div className="text-[9px] uppercase tracking-widest text-[#334155] mb-2.5">Aufträge</div>
         <button
           onClick={onNew}
-          className="w-full flex items-center gap-2 bg-[#1e3a5f] hover:bg-[#243f6a] text-accent border border-[#2d4f7c] rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          className="w-full flex items-center gap-2 bg-[var(--app-accent-dim)] hover:bg-[var(--app-accent-dim-hover)] text-accent border border-[var(--app-accent-dim-border)] rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
         >
           <Plus size={13} /> Neuer Auftrag
         </button>
@@ -46,12 +46,12 @@ export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDe
             onClick={() => onSelect(a.id)}
             className={`group flex items-center rounded-md px-2.5 py-2 mb-0.5 cursor-pointer transition-colors ${
               aktiveId === a.id
-                ? 'bg-[#0f2240] border-l-[3px] border-accent pl-[7px]'
+                ? 'bg-[var(--app-accent-dark)] border-l-[3px] border-accent pl-[7px]'
                 : 'hover:bg-[#0d1830]'
             }`}
           >
             <div className="flex-1 min-w-0">
-              <div className={`text-xs font-medium truncate ${aktiveId === a.id ? 'text-[#93c5fd]' : 'text-foreground'}`}>
+              <div className={`text-xs font-medium truncate ${aktiveId === a.id ? 'text-[var(--app-accent-lighter)]' : 'text-foreground'}`}>
                 {a.name}
               </div>
               <div className="text-[10px] text-[#334155] mt-0.5 truncate">
