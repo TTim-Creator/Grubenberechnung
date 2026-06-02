@@ -115,3 +115,10 @@ export async function saveLizenz(data: Partial<Omit<LizenzRecord, 'id'>>): Promi
     .join(', ')
   await conn.execute(`UPDATE lizenz SET ${fields} WHERE id=1`, Object.values(data))
 }
+
+// Speichert den Unix-Timestamp des letzten Online-Checks
+export async function updateLetzterOnlineCheck(): Promise<void> {
+  const conn = await getDb()
+  const ts = Math.floor(Date.now() / 1000).toString()
+  await conn.execute(`UPDATE lizenz SET letzter_check=$1 WHERE id=1`, [ts])
+}

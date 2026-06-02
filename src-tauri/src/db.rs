@@ -1,3 +1,7 @@
+pub const MIGRATION_V4: &str = r#"
+ALTER TABLE lizenz ADD COLUMN auth_token TEXT;
+"#;
+
 pub const MIGRATION_V3: &str = r#"
 ALTER TABLE berechnungen ADD COLUMN bezeichnung TEXT NOT NULL DEFAULT '';
 "#;

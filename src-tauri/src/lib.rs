@@ -1,7 +1,7 @@
 mod commands;
 mod db;
 
-use commands::{check_license_background, get_fingerprint, validate_license_online};
+use commands::{get_fingerprint, startup_lizenz_check, validate_license_online};
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +31,12 @@ pub fn run() {
                             sql: db::MIGRATION_V3,
                             kind: MigrationKind::Up,
                         },
+                        Migration {
+                            version: 4,
+                            description: "add auth_token to lizenz",
+                            sql: db::MIGRATION_V4,
+                            kind: MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),
@@ -38,7 +44,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_fingerprint,
             validate_license_online,
-            check_license_background,
+            startup_lizenz_check,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

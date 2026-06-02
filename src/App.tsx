@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Layout } from './components/Layout'
 import { LizenzView } from './components/LizenzView'
-import { getLizenzStatus, hintergrundCheck } from './lib/license'
+import { startupLizenzCheck } from './lib/license'
 import { loadEinstellungen } from './lib/db'
 import { applyAkzentFarbe } from './lib/theme'
 
@@ -10,10 +10,7 @@ export default function App() {
 
   useEffect(() => {
     loadEinstellungen().then(e => applyAkzentFarbe(e?.akzent_farbe ?? '#3b82f6')).catch(() => {})
-    getLizenzStatus().then(l => {
-      setLizenzStatus(l.status === 'aktiv' ? 'aktiv' : 'inaktiv')
-      if (l.status === 'aktiv') hintergrundCheck()
-    })
+    startupLizenzCheck().then(status => setLizenzStatus(status))
   }, [])
 
   if (lizenzStatus === 'prüfen') {

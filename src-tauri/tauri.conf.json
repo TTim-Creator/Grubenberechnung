@@ -35,6 +35,23 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "Tiefbau Software",
+    "copyright": "© 2026 Tiefbau Software. Alle Rechte vorbehalten.",
+    "shortDescription": "Schnelle Grubenfaktor-Berechnung für den Tiefbau",
+    "longDescription": "Professionelle Desktop-Software zur Berechnung von Breiten- und Tiefenfaktoren für Tiefbauarbeiten. Mit Auftragsverwaltung und Lizenzschutz.",
+    "macOS": {
+      "dmg": {
+        "windowSize": { "width": 600, "height": 400 },
+        "appPosition": { "x": 160, "y": 200 },
+        "applicationFolderPosition": { "x": 440, "y": 200 }
+      },
+      "minimumSystemVersion": "10.15"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    }
   }
 }
