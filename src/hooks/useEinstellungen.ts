@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Einstellungen } from '@/types'
 import { loadEinstellungen, saveEinstellungen } from '@/lib/db'
+import { applyAkzentFarbe } from '@/lib/theme'
 
 const DEFAULT: Einstellungen = {
   id: 1, std_breite: 15, std_tiefe: 45, b_einheit: 15, t_einheit: 15,
@@ -20,6 +21,7 @@ export function useEinstellungen() {
   const speichern = useCallback(async (data: Omit<Einstellungen, 'id'>) => {
     await saveEinstellungen(data)
     setEinstellungen({ id: 1, ...data })
+    applyAkzentFarbe(data.akzent_farbe)
   }, [])
 
   return { einstellungen, loading, speichern }

@@ -28,6 +28,7 @@ export function Layout() {
       <Sidebar
         auftraege={auftraege}
         aktiveId={aktiveAuftragId}
+        firmenName={einstellungen.firmen_name ?? ''}
         onSelect={id => { setAktiveAuftragId(id); setShowSettings(false) }}
         onNew={() => setModalOpen(true)}
         onDelete={async id => {

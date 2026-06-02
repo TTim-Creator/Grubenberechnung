@@ -4,15 +4,26 @@ import { Plus, Settings, Trash2 } from 'lucide-react'
 interface Props {
   auftraege: Auftrag[]
   aktiveId: number | null
+  firmenName: string
   onSelect: (id: number) => void
   onNew: () => void
   onDelete: (id: number) => void
   onSettings: () => void
 }
 
-export function Sidebar({ auftraege, aktiveId, onSelect, onNew, onDelete, onSettings }: Props) {
+export function Sidebar({ auftraege, aktiveId, firmenName, onSelect, onNew, onDelete, onSettings }: Props) {
   return (
     <div className="w-[220px] flex-shrink-0 bg-[#080d1a] border-r border-[#0d1830] flex flex-col">
+      {/* App-Titel + Firmenname */}
+      <div className="px-3 pt-3 pb-2 border-b border-[#0d1830]">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm">⛏</span>
+          <span className="text-xs font-semibold text-foreground">Grubenberechnung</span>
+        </div>
+        {firmenName && (
+          <div className="text-[10px] text-accent mt-0.5 truncate">{firmenName}</div>
+        )}
+      </div>
       <div className="p-3 border-b border-[#0d1830]">
         <div className="text-[9px] uppercase tracking-widest text-[#334155] mb-2.5">Aufträge</div>
         <button

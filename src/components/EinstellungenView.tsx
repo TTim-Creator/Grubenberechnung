@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Einstellungen } from '@/types'
 import { AKZENT_PRESETS } from '@/types'
 import { ArrowLeft, Save, Lock, Eye, EyeOff } from 'lucide-react'
-import { applyAkzentFarbe } from '@/App'
+import { applyAkzentFarbe } from '@/lib/theme'
 
 // Passwort für Erweiterte Einstellungen (UI-Schutz)
 const ERWEITERTES_PW = 'TTRRR2026!'

@@ -3,6 +3,10 @@
 @layer base {
   :root {
     color-scheme: dark;
+    /* Dynamische Akzentfarbe — wird per JS überschrieben */
+    --app-accent:       #3b82f6;
+    --app-accent-light: #60a5fa;
+    --app-accent-dim:   #1e3a5f;
     --background: 222 47% 7%;
     --foreground: 214 32% 91%;
     --card: 222 47% 6%;
@@ -43,3 +47,13 @@ body {
 ::-webkit-scrollbar-thumb { background: #1e2a40; border-radius: 2px; }
 
 input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+/* Dynamische Akzentfarbe — überschreibt Tailwind-Statikwerte */
+@layer utilities {
+  .text-accent         { color: var(--app-accent) !important; }
+  .text-accent-light   { color: var(--app-accent-light) !important; }
+  .bg-accent-dim       { background-color: var(--app-accent-dim) !important; }
+  .border-accent       { border-color: var(--app-accent) !important; }
+  .border-accent-dim   { border-color: var(--app-accent-dim) !important; }
+  .focus\:border-accent:focus { border-color: var(--app-accent) !important; }
+}
