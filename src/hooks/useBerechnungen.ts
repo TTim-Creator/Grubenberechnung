@@ -19,7 +19,7 @@ export function useBerechnungen(auftragId: number | null) {
   ) => {
     if (!auftragId) return
     const b = await createBerechnung(auftragId, breite, tiefe, bFaktor, tFaktor, bezeichnung)
-    setBerechnungen(prev => [...prev, b])
+    setBerechnungen(prev => [b, ...prev])
   }, [auftragId])
 
   const loescheBerechnung = useCallback(async (id: number) => {
