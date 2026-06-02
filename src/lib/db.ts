@@ -59,7 +59,7 @@ export async function deleteAuftrag(id: number): Promise<void> {
 export async function loadBerechnungen(auftragId: number): Promise<Berechnung[]> {
   const conn = await getDb()
   return conn.select<Berechnung[]>(
-    'SELECT * FROM berechnungen WHERE auftrag_id=$1 ORDER BY erstellt_am ASC',
+    'SELECT * FROM berechnungen WHERE auftrag_id=$1 ORDER BY erstellt_am DESC',
     [auftragId],
   )
 }
