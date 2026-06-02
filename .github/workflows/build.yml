@@ -1,0 +1,71 @@
+name: Build Grubenberechnung Installer
+
+on:
+  push:
+    tags:
+      - 'v*'          # Startet bei git tag v1.0.0
+  workflow_dispatch:  # Manueller Start über GitHub-Button
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: '--target aarch64-apple-darwin'
+            name: macOS (Apple Silicon)
+          - platform: macos-13
+            args: '--target x86_64-apple-darwin'
+            name: macOS (Intel)
+          - platform: windows-latest
+            args: ''
+            name: Windows
+
+    runs-on: ${{ matrix.platform }}
+    name: Build ${{ matrix.name }}
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Rust einrichten
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || matrix.platform == 'macos-13' && 'x86_64-apple-darwin' || '' }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Frontend-Abhängigkeiten installieren
+        run: npm install
+
+      - name: Tauri App bauen
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Grubenberechnung ${{ github.ref_name }}'
+          releaseBody: |
+            ## Grubenberechnung ${{ github.ref_name }}
+
+            ### Download
+            - **macOS (Apple Silicon M1/M2/M3):** `Grubenberechnung_*_aarch64.dmg`
+            - **macOS (Intel):** `Grubenberechnung_*_x64.dmg`
+            - **Windows:** `Grubenberechnung_*_x64-setup.exe`
+
+            ### Installation
+            **macOS:** DMG öffnen → App in Programme-Ordner ziehen
+            **Windows:** Setup.exe doppelklicken → Weiter → Fertig
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
