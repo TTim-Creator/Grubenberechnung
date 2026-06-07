@@ -26,3 +26,6 @@ src-tauri/gen
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code / Superpowers Session-Dateien
+.superpowers/
