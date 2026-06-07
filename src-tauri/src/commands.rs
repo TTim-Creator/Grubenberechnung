@@ -114,7 +114,7 @@ pub async fn startup_lizenz_check(
         });
     }
 
-    // Schritt 2: Wie lange seit dem letzten Online-Check?
+    // Schritt 2: Zeitdifferenz für Gnadenfrist-Logik im Offline-Fall berechnen
     let sieben_tage_sek: i64 = 7 * 24 * 60 * 60;
     let jetzt = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -126,13 +126,8 @@ pub async fn startup_lizenz_check(
         .unwrap_or(0);
 
     let delta_sek = jetzt - letzter_check_sek;
-    let online_check_noetig = delta_sek > sieben_tage_sek || letzter_check_sek == 0;
 
-    if !online_check_noetig {
-        return Ok(StartupCheck { gueltig: true, grund: "token_ok".into() });
-    }
-
-    // Schritt 3: Online-Check erzwingen
+    // Schritt 3: Immer Online-Check durchführen (Timeout 8 Sekunden)
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(8))
         .build()

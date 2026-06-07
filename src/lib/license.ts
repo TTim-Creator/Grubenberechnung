@@ -11,7 +11,7 @@ async function getDb() {
  * Startup-Check: vollständig in Rust — JS liest DB-Status NICHT direkt.
  * Rust validiert das HMAC-Token. DB-Manipulation wird erkannt.
  */
-export async function startupLizenzCheck(): Promise<'aktiv' | 'inaktiv'> {
+export async function startupLizenzCheck(): Promise<'aktiv' | 'inaktiv' | 'abgelaufen'> {
   try {
     const lizenz = await loadLizenz()
     if (!lizenz.lizenz_key || !lizenz.maschinen_id) return 'inaktiv'
@@ -35,10 +35,17 @@ export async function startupLizenzCheck(): Promise<'aktiv' | 'inaktiv'> {
       return 'aktiv'
     }
 
-    // Lizenz ungültig oder Token manipuliert
-    if (result.grund.startsWith('online_ungueltig') || result.grund === 'token_ungueltig') {
+    // Lizenz vom Server widerrufen, abgelaufen oder Token manipuliert → Fehlerscreen
+    if (
+      result.grund.startsWith('online_ungueltig') ||
+      result.grund === 'abgelaufen' ||
+      result.grund === 'token_ungueltig'
+    ) {
       await saveLizenz({ status: 'widerrufen' as LizenzStatus })
+      return 'abgelaufen'
     }
+
+    // kein_token oder sonstiger Grund → Aktivierungsscreen
     return 'inaktiv'
   } catch {
     return 'inaktiv'

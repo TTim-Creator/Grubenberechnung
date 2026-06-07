@@ -2,6 +2,8 @@ import type { Auftrag, Berechnung, Einstellungen } from '@/types'
 import { BerechnungRow } from './BerechnungRow'
 import { BerechnungForm } from './BerechnungForm'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { exportAuftragAlsCsv } from '@/lib/csvExport'
+import { Download } from 'lucide-react'
 
 interface Props {
   auftrag: Auftrag | null
@@ -33,9 +35,21 @@ export function AuftragDetail({
             {auftrag.adresse && ` · ${auftrag.adresse}`}
           </div>
         </div>
-        <span className="bg-[var(--app-accent-dark)] text-accent text-[10px] px-2.5 py-1 rounded-full border border-[var(--app-accent-dim)]">
-          {berechnungen.length} Berechnung{berechnungen.length !== 1 ? 'en' : ''}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="bg-[var(--app-accent-dark)] text-accent text-[10px] px-2.5 py-1 rounded-full border border-[var(--app-accent-dim)]">
+            {berechnungen.length} Berechnung{berechnungen.length !== 1 ? 'en' : ''}
+          </span>
+          {berechnungen.length > 0 && (
+            <button
+              onClick={() => exportAuftragAlsCsv(auftrag, berechnungen)}
+              title="Als CSV exportieren"
+              className="flex items-center gap-1.5 text-[#475569] hover:text-muted-foreground hover:bg-[#0d1830] border border-[#1e2a40] hover:border-[#334155] rounded-md px-2.5 py-1 text-[10px] transition-colors"
+            >
+              <Download size={11} />
+              CSV
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between px-5 py-2 border-b border-[#0d1830]">

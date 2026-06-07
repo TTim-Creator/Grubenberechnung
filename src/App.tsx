@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Layout } from './components/Layout'
 import { LizenzView } from './components/LizenzView'
+import { LizenzAbgelaufenView } from './components/LizenzAbgelaufenView'
 import { startupLizenzCheck } from './lib/license'
 import { loadEinstellungen } from './lib/db'
 import { applyAkzentFarbe } from './lib/theme'
 
 export default function App() {
-  const [lizenzStatus, setLizenzStatus] = useState<'prüfen' | 'aktiv' | 'inaktiv'>('prüfen')
+  const [lizenzStatus, setLizenzStatus] = useState<'prüfen' | 'aktiv' | 'inaktiv' | 'abgelaufen'>('prüfen')
 
   useEffect(() => {
     loadEinstellungen().then(e => applyAkzentFarbe(e?.akzent_farbe ?? '#3b82f6')).catch(() => {})
@@ -19,6 +20,10 @@ export default function App() {
         Wird geladen…
       </div>
     )
+  }
+
+  if (lizenzStatus === 'abgelaufen') {
+    return <LizenzAbgelaufenView onAktiviert={() => setLizenzStatus('aktiv')} />
   }
 
   if (lizenzStatus === 'inaktiv') {
