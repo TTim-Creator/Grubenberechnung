@@ -45,10 +45,27 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
+      # ── Windows Code-Signing ─────────────────────────────────────────────────
+      # Zertifikat aus GitHub Secret importieren (Base64-kodierte .pfx Datei)
+      # Secret muss gesetzt sein: WINDOWS_CERTIFICATE + WINDOWS_CERTIFICATE_PASSWORD
+      - name: Windows Zertifikat importieren
+        if: matrix.platform == 'windows-latest' && env.WINDOWS_CERTIFICATE != ''
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+        shell: pwsh
+        run: |
+          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          $certPath = Join-Path $env:RUNNER_TEMP "certificate.pfx"
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          echo "CERT_PATH=$certPath" >> $env:GITHUB_ENV
+
       - name: Tauri App bauen
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Windows Signing (nur aktiv wenn Secrets gesetzt)
+          TAURI_SIGNING_WINDOWS_CERTIFICATE_FILE: ${{ env.CERT_PATH }}
+          TAURI_SIGNING_WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Grubenberechnung ${{ github.ref_name }}'
@@ -57,8 +74,8 @@ jobs:
 
             ### Installation
             - **Windows**: `.msi` Datei herunterladen und ausführen
-            - **Mac (Apple Silicon / M1–M4)**: `aarch64.dmg` herunterladen
-            - **Mac (Intel)**: `x86_64.dmg` herunterladen
+            - **Mac (Apple Silicon / M1–M4)**: `_aarch64.dmg` herunterladen
+            - **Mac (Intel)**: `_x86_64.dmg` herunterladen
 
             ### Voraussetzungen
             - Gültiger Lizenzschlüssel erforderlich
@@ -66,3 +83,10 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+      # Zertifikat-Datei nach dem Build sicher löschen
+      - name: Zertifikat aufräumen
+        if: matrix.platform == 'windows-latest' && env.CERT_PATH != ''
+        shell: pwsh
+        run: |
+          if (Test-Path $env:CERT_PATH) { Remove-Item $env:CERT_PATH -Force }
