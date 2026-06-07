@@ -23,7 +23,8 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; connect-src 'self' https://api.keygen.sh; img-src 'self' data:; style-src 'self' 'unsafe-inline'",
+      "dangerousDisableAssetCspModification": false
     }
   },
   "bundle": {
