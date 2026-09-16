@@ -14,11 +14,15 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? 'terser' : false,
     terserOptions: {
       compress: {
-        passes: 3,
+        passes: 1,
         drop_console: true,
         drop_debugger: true,
       },
-      mangle: { toplevel: true },
+      // toplevel-Mangling kann bei zirkulären ES-Modul-Imports die
+      // Initialisierungsreihenfolge verändern und React-Refs als
+      // `undefined` auflösen ("Cannot read properties of undefined
+      // (reading 'current')") — deshalb bewusst deaktiviert.
+      mangle: { toplevel: false },
       format: { comments: false },
     },
   },

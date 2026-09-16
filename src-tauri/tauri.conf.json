@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Grubenberechnung",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "identifier": "com.grubenberechnung.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -43,9 +43,18 @@
     "longDescription": "Professionelle Desktop-Software zur Berechnung von Breiten- und Tiefenfaktoren für Tiefbauarbeiten. Mit Auftragsverwaltung und Lizenzschutz.",
     "macOS": {
       "dmg": {
-        "windowSize": { "width": 600, "height": 400 },
-        "appPosition": { "x": 160, "y": 200 },
-        "applicationFolderPosition": { "x": 440, "y": 200 }
+        "windowSize": {
+          "width": 600,
+          "height": 400
+        },
+        "appPosition": {
+          "x": 160,
+          "y": 200
+        },
+        "applicationFolderPosition": {
+          "x": 440,
+          "y": 200
+        }
       },
       "minimumSystemVersion": "10.15"
     },
@@ -53,6 +62,15 @@
       "webviewInstallMode": {
         "type": "embedBootstrapper"
       }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU0Njg4QTNEODNDNENFQUQKUldTdHpzU0RQWXBvVkdJeFRHRVM1ckxIaWtDbno1UHBHTlVJby96MzNhWXR1ZEVZN3hkTmdSUzkK",
+      "endpoints": [
+        "https://github.com/TTim-Creator/Grubenberechnung/releases/latest/download/latest.json"
+      ]
     }
   }
 }

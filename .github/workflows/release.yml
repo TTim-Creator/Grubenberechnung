@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -63,9 +67,26 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # HMAC-Secret für die Lizenz-Token-Signierung (zur Compile-Zeit eingebettet)
+          GRUBEN_HMAC_SECRET: ${{ secrets.GRUBEN_HMAC_SECRET }}
+          # Updater-Artefakt-Signierung (latest.json + .sig Dateien)
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
           # Windows Signing (nur aktiv wenn Secrets gesetzt)
           TAURI_SIGNING_WINDOWS_CERTIFICATE_FILE: ${{ env.CERT_PATH }}
           TAURI_SIGNING_WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          # macOS Signing + Notarisierung (nur aktiv wenn Secrets gesetzt):
+          #   APPLE_CERTIFICATE          = Base64-kodierte .p12 (Developer ID Application)
+          #   APPLE_CERTIFICATE_PASSWORD = Passwort der .p12
+          #   APPLE_SIGNING_IDENTITY     = z. B. "Developer ID Application: Name (TEAMID)"
+          #   APPLE_ID / APPLE_PASSWORD  = Apple-ID + App-spezifisches Passwort (Notarisierung)
+          #   APPLE_TEAM_ID              = Team-ID des Developer-Accounts
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Grubenberechnung ${{ github.ref_name }}'
@@ -80,8 +101,11 @@ jobs:
             ### Voraussetzungen
             - Gültiger Lizenzschlüssel erforderlich
             - Internetverbindung für Lizenzaktivierung
+
+            Installierte Apps aktualisieren sich ab dieser Version automatisch.
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
           args: ${{ matrix.args }}
 
       # Zertifikat-Datei nach dem Build sicher löschen

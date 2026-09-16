@@ -1,73 +1,82 @@
+use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
+use sha2::Sha256;
 use tauri::command;
+
+type HmacSha256 = Hmac<Sha256>;
 
 const KEYGEN_ACCOUNT: &str = "a5a099da-5c45-43f3-a25e-39a91ec97a06";
 
-// HMAC-Secret: in kompiliertem Rust-Binary eingebettet — nicht im Klartext in der DB
-// Ein Angreifer müsste den Rust-Binary reverse-engineeren um diesen Wert zu finden
-const HMAC_SECRET: &[u8] = b"Gru8en!B3r3chn#K3y$2026@Tief%Bau&Secure^Token";
+// HMAC-Secret zur Compile-Zeit aus der Umgebung (CI setzt GRUBEN_HMAC_SECRET
+// aus einem GitHub Secret). Der Fallback gilt nur für lokale Dev-Builds —
+// damit signierte Tokens aus Dev-Builds in Release-Builds NICHT gültig sind.
+const HMAC_SECRET: &str = match option_env!("GRUBEN_HMAC_SECRET") {
+    Some(s) => s,
+    None => "dev-secret-nur-fuer-lokale-builds",
+};
+
+/// Offline-Gnadenfrist: solange darf die App ohne erfolgreichen
+/// Online-Check weiterlaufen, sofern das lokale Token gültig ist.
+const GNADENFRIST_SEK: i64 = 14 * 24 * 60 * 60; // 14 Tage
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LizenzValidierungErgebnis {
     pub gueltig: bool,
-    pub token: Option<String>,  // HMAC-signiertes Token für lokale Verifikation
+    pub token: Option<String>, // HMAC-signiertes Token für lokale Verifikation
     pub fehler: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct StartupCheck {
     pub gueltig: bool,
-    pub grund: String, // "token_ok" | "online_ok" | "grace_period" | "abgelaufen" | "kein_token"
+    pub grund: String, // "online_ok" | "grace_period" | "online_ungueltig:*" | "token_ungueltig" | "abgelaufen" | "kein_token"
+    pub neues_token: Option<String>, // gesetzt wenn das Token nach Online-OK neu signiert wurde
 }
 
 // ── HMAC-Token Generierung & Prüfung ─────────────────────────────────────────
 
-fn hmac_sha256(key: &[u8], data: &[u8]) -> Vec<u8> {
-    // RFC 2104 HMAC-SHA256 ohne externe Crate (nur std + sha2 würde besser sein,
-    // aber für Build-Einfachheit: einfaches HMAC mit Blake3-ähnlichem Approach via SHA-256)
-    // Wir nutzen sha2 über den bereits vorhandenen reqwest/rustls Stack nicht direkt,
-    // daher: iterative SHA-256 mit Padding (korrekte RFC 2104 Implementierung)
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
+fn hex_encode(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
 
-    // Vereinfachte aber robuste Token-Signierung:
-    // token = hex(SHA256-like(secret + data + secret))
-    // Für Production würde man sha2 crate hinzufügen — hier nutzen wir
-    // mehrfach verschachteltes Hashing mit dem Secret
-
-    let mut hasher = DefaultHasher::new();
-    key.hash(&mut hasher);
-    data.hash(&mut hasher);
-    key.hash(&mut hasher);
-    let h1 = hasher.finish();
-
-    let mut hasher2 = DefaultHasher::new();
-    h1.hash(&mut hasher2);
-    key.hash(&mut hasher2);
-    data.hash(&mut hasher2);
-    h1.hash(&mut hasher2);
-    let h2 = hasher2.finish();
-
-    format!("{h1:016x}{h2:016x}").into_bytes()
+fn hmac_sign(data: &[u8]) -> String {
+    let mut mac = HmacSha256::new_from_slice(HMAC_SECRET.as_bytes())
+        .expect("HMAC akzeptiert Keys beliebiger Länge");
+    mac.update(data);
+    hex_encode(&mac.finalize().into_bytes())
 }
 
 pub fn erzeuge_token(lizenz_key: &str, fingerprint: &str) -> String {
     let data = format!("{lizenz_key}:{fingerprint}:GUELTIG");
-    let sig = hmac_sha256(HMAC_SECRET, data.as_bytes());
-    let sig_hex = String::from_utf8(sig).unwrap_or_default();
-    // Token-Format: base64-ähnlich kodiertes "lizenz:fingerprint:sig"
-    format!("GBv1:{}:{}:{}", &lizenz_key[..8.min(lizenz_key.len())], fingerprint.len(), sig_hex)
+    let sig = hmac_sign(data.as_bytes());
+    format!(
+        "GBv2:{}:{}:{}",
+        &lizenz_key[..8.min(lizenz_key.len())],
+        fingerprint.len(),
+        sig
+    )
 }
 
 pub fn verifiziere_token(token: &str, lizenz_key: &str, fingerprint: &str) -> bool {
     let expected = erzeuge_token(lizenz_key, fingerprint);
-    // Constant-time-ähnlicher Vergleich
-    if token.len() != expected.len() { return false; }
-    token.bytes().zip(expected.bytes()).fold(0u8, |acc, (a, b)| acc | (a ^ b)) == 0
+    // Constant-time Vergleich über den gesamten Token
+    if token.len() != expected.len() {
+        return false;
+    }
+    token
+        .bytes()
+        .zip(expected.bytes())
+        .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+        == 0
 }
 
 // ── Hardware Fingerprint ──────────────────────────────────────────────────────
 
+/// Hostname-basierter Fingerprint (wie vor der machine-uid-Umstellung).
+/// WICHTIG: Bereits bei Keygen aktivierte Lizenzen sind an dieses Format
+/// gebunden (fingerprint scope). Eine Änderung des Algorithmus macht alle
+/// bestehenden Aktivierungen ungültig (FINGERPRINT_SCOPE_MISMATCH) — daher
+/// NICHT ohne Migration der bereits registrierten Maschinen bei Keygen ändern.
 #[command]
 pub fn get_fingerprint() -> String {
     use std::collections::hash_map::DefaultHasher;
@@ -88,12 +97,12 @@ pub fn get_fingerprint() -> String {
 
 // ── Startup-Lizenzprüfung (Rust-seitig, nicht umgehbar durch DB-Manipulation) ─
 
-/// Prüft die Lizenz beim App-Start. JS erhält nur true/false — nie den DB-Status direkt.
+/// Prüft die Lizenz beim App-Start. JS erhält nur das Ergebnis — nie den DB-Status direkt.
 /// Ablauf:
-///   1. Token aus DB lesen
-///   2. Token-Signatur mit HMAC prüfen (schlägt fehl wenn DB manipuliert)
-///   3. Letzter Online-Check: wenn > 7 Tage → Online-Check erzwingen
-///   4. Online-Check schlägt fehl (kein Internet) → Offline-Gnadenfrist bis 7 Tage
+///   1. Token-Signatur mit HMAC prüfen (schlägt fehl wenn DB manipuliert oder Secret rotiert)
+///   2. Online-Check gegen Keygen (Timeout 8 Sekunden)
+///   3. Online OK + Token war ungültig → Token neu signieren (Selbstheilung nach Secret-Rotation)
+///   4. Offline: Gnadenfrist von 14 Tagen seit letztem Online-Check, nur bei gültigem Token
 #[command]
 pub async fn startup_lizenz_check(
     token: String,
@@ -101,33 +110,25 @@ pub async fn startup_lizenz_check(
     fingerprint: String,
     letzter_online_check_iso: String,
 ) -> Result<StartupCheck, String> {
-
-    // Schritt 1: Token-Signatur prüfen
     if token.is_empty() {
-        return Ok(StartupCheck { gueltig: false, grund: "kein_token".into() });
-    }
-
-    if !verifiziere_token(&token, &lizenz_key, &fingerprint) {
         return Ok(StartupCheck {
             gueltig: false,
-            grund: "token_ungueltig".into(), // DB wurde manipuliert
+            grund: "kein_token".into(),
+            neues_token: None,
         });
     }
 
-    // Schritt 2: Zeitdifferenz für Gnadenfrist-Logik im Offline-Fall berechnen
-    let sieben_tage_sek: i64 = 7 * 24 * 60 * 60;
+    let token_ok = verifiziere_token(&token, &lizenz_key, &fingerprint);
+
+    // Zeitdifferenz für Gnadenfrist-Logik im Offline-Fall berechnen
     let jetzt = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs() as i64;
-
-    let letzter_check_sek = letzter_online_check_iso
-        .parse::<i64>()
-        .unwrap_or(0);
-
+    let letzter_check_sek = letzter_online_check_iso.parse::<i64>().unwrap_or(0);
     let delta_sek = jetzt - letzter_check_sek;
 
-    // Schritt 3: Immer Online-Check durchführen (Timeout 8 Sekunden)
+    // Online-Check durchführen (Timeout 8 Sekunden)
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(8))
         .build()
@@ -158,23 +159,82 @@ pub async fn startup_lizenz_check(
             let valid = json["meta"]["valid"].as_bool().unwrap_or(false);
 
             if valid {
-                Ok(StartupCheck { gueltig: true, grund: "online_ok".into() })
+                // Selbstheilung: Server bestätigt die Lizenz — war das lokale Token
+                // ungültig (z. B. nach Secret-Rotation), wird es neu signiert.
+                let neues_token =
+                    (!token_ok).then(|| erzeuge_token(&lizenz_key, &fingerprint));
+                Ok(StartupCheck {
+                    gueltig: true,
+                    grund: "online_ok".into(),
+                    neues_token,
+                })
             } else {
                 let code = json["meta"]["code"].as_str().unwrap_or("INVALID");
                 Ok(StartupCheck {
                     gueltig: false,
                     grund: format!("online_ungueltig:{code}"),
+                    neues_token: None,
                 })
             }
         }
         Err(_) => {
-            // Kein Internet: Gnadenfrist prüfen (max. 7 Tage offline)
-            if delta_sek < sieben_tage_sek * 2 {
-                Ok(StartupCheck { gueltig: true, grund: "grace_period".into() })
+            // Kein Internet: Gnadenfrist nur mit gültigem lokalen Token
+            if !token_ok {
+                Ok(StartupCheck {
+                    gueltig: false,
+                    grund: "token_ungueltig".into(), // DB manipuliert oder Secret rotiert
+                    neues_token: None,
+                })
+            } else if delta_sek < GNADENFRIST_SEK {
+                Ok(StartupCheck {
+                    gueltig: true,
+                    grund: "grace_period".into(),
+                    neues_token: None,
+                })
             } else {
-                Ok(StartupCheck { gueltig: false, grund: "abgelaufen".into() })
+                Ok(StartupCheck {
+                    gueltig: false,
+                    grund: "abgelaufen".into(),
+                    neues_token: None,
+                })
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn token_roundtrip_gueltig() {
+        let token = erzeuge_token("ABCD-1234-EFGH", "gb-deadbeef");
+        assert!(verifiziere_token(&token, "ABCD-1234-EFGH", "gb-deadbeef"));
+    }
+
+    #[test]
+    fn token_falscher_key_ungueltig() {
+        let token = erzeuge_token("ABCD-1234-EFGH", "gb-deadbeef");
+        assert!(!verifiziere_token(&token, "XXXX-0000-YYYY", "gb-deadbeef"));
+    }
+
+    #[test]
+    fn token_falscher_fingerprint_ungueltig() {
+        let token = erzeuge_token("ABCD-1234-EFGH", "gb-deadbeef");
+        assert!(!verifiziere_token(&token, "ABCD-1234-EFGH", "gb-cafebabe"));
+    }
+
+    #[test]
+    fn token_manipulation_ungueltig() {
+        let mut token = erzeuge_token("ABCD-1234-EFGH", "gb-deadbeef");
+        let letztes = token.pop().unwrap();
+        token.push(if letztes == 'a' { 'b' } else { 'a' });
+        assert!(!verifiziere_token(&token, "ABCD-1234-EFGH", "gb-deadbeef"));
+    }
+
+    #[test]
+    fn fingerprint_ist_stabil() {
+        assert_eq!(get_fingerprint(), get_fingerprint());
     }
 }
 

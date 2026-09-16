@@ -29,3 +29,4 @@ Thumbs.db
 
 # Claude Code / Superpowers Session-Dateien
 .superpowers/
+.claude-flow/

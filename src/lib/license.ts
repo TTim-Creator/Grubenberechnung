@@ -23,14 +23,21 @@ export async function startupLizenzCheck(): Promise<'aktiv' | 'inaktiv' | 'abgel
     )
     const token = rows[0]?.auth_token ?? ''
 
-    const result: { gueltig: boolean; grund: string } = await invoke('startup_lizenz_check', {
-      token,
-      lizenzKey: lizenz.lizenz_key,
-      fingerprint: lizenz.maschinen_id,
-      letzterOnlineCheckIso: lizenz.letzter_check ?? '0',
-    })
+    const result: { gueltig: boolean; grund: string; neues_token?: string | null } = await invoke(
+      'startup_lizenz_check',
+      {
+        token,
+        lizenzKey: lizenz.lizenz_key,
+        fingerprint: lizenz.maschinen_id,
+        letzterOnlineCheckIso: lizenz.letzter_check ?? '0',
+      },
+    )
 
     if (result.gueltig) {
+      // Selbstheilung: Rust hat das Token neu signiert (z. B. nach Secret-Rotation)
+      if (result.neues_token) {
+        await db.execute('UPDATE lizenz SET auth_token=$1 WHERE id=1', [result.neues_token])
+      }
       if (result.grund === 'online_ok') await updateLetzterOnlineCheck()
       return 'aktiv'
     }
@@ -47,7 +54,10 @@ export async function startupLizenzCheck(): Promise<'aktiv' | 'inaktiv' | 'abgel
 
     // kein_token oder sonstiger Grund → Aktivierungsscreen
     return 'inaktiv'
-  } catch {
+  } catch (e) {
+    // Unerwarteter Fehler (z. B. DB nicht lesbar) — nicht als widerrufen behandeln,
+    // sondern loggen und den Aktivierungsscreen zeigen (Re-Aktivierung repariert den Zustand)
+    console.error('Lizenzprüfung fehlgeschlagen:', e)
     return 'inaktiv'
   }
 }
