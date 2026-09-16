@@ -63,6 +63,13 @@ jobs:
           [IO.File]::WriteAllBytes($certPath, $certBytes)
           echo "CERT_PATH=$certPath" >> $env:GITHUB_ENV
 
+      # tauri-action versucht Code-Signing sobald eine der APPLE_*/
+      # TAURI_SIGNING_WINDOWS_*-Variablen im Environment gesetzt ist — auch
+      # mit leerem String (z. B. `security import` mit leerem Zertifikat
+      # schlägt dann mit "parameters ... not valid" fehl). Da aktuell nur
+      # GRUBEN_HMAC_SECRET und TAURI_SIGNING_PRIVATE_KEY als Repo-Secrets
+      # existieren, dürfen die Signing-Variablen NICHT gesetzt werden, bevor
+      # die echten Zertifikate hinterlegt sind — sonst bricht der Build ab.
       - name: Tauri App bauen
         uses: tauri-apps/tauri-action@v0
         env:
@@ -72,21 +79,19 @@ jobs:
           # Updater-Artefakt-Signierung (latest.json + .sig Dateien)
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
-          # Windows Signing (nur aktiv wenn Secrets gesetzt)
-          TAURI_SIGNING_WINDOWS_CERTIFICATE_FILE: ${{ env.CERT_PATH }}
-          TAURI_SIGNING_WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-          # macOS Signing + Notarisierung (nur aktiv wenn Secrets gesetzt):
-          #   APPLE_CERTIFICATE          = Base64-kodierte .p12 (Developer ID Application)
-          #   APPLE_CERTIFICATE_PASSWORD = Passwort der .p12
-          #   APPLE_SIGNING_IDENTITY     = z. B. "Developer ID Application: Name (TEAMID)"
-          #   APPLE_ID / APPLE_PASSWORD  = Apple-ID + App-spezifisches Passwort (Notarisierung)
-          #   APPLE_TEAM_ID              = Team-ID des Developer-Accounts
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Windows Code-Signing (Secrets WINDOWS_CERTIFICATE + WINDOWS_CERTIFICATE_PASSWORD
+          # noch nicht hinterlegt) — sobald vorhanden, hier wieder aktivieren:
+          #   TAURI_SIGNING_WINDOWS_CERTIFICATE_FILE: ${{ env.CERT_PATH }}
+          #   TAURI_SIGNING_WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          # macOS Signing + Notarisierung (Secrets APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD,
+          # APPLE_SIGNING_IDENTITY, APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID noch nicht
+          # hinterlegt) — sobald vorhanden, hier wieder aktivieren:
+          #   APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          #   APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          #   APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          #   APPLE_ID: ${{ secrets.APPLE_ID }}
+          #   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          #   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Grubenberechnung ${{ github.ref_name }}'
